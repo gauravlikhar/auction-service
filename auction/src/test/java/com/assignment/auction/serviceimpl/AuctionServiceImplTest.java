@@ -1,5 +1,5 @@
 /**
- * @author gaurav.likhar
+ * @author yukti.gupta
  * @date 28/04/23
  * @project_name auction
  **/
@@ -7,6 +7,7 @@
 package com.assignment.auction.serviceimpl;
 
 import com.assignment.auction.Constants;
+import com.assignment.auction.dto.request.BidRequestDto;
 import com.assignment.auction.repository.AuctionRepository;
 import com.assignment.auction.repository.BidRepository;
 import com.assignment.auction.service.impl.AuctionServiceImpl;
@@ -110,6 +111,25 @@ public class AuctionServiceImplTest {
     void getAllBidsByDealerIdException(){
         when(bidRepository.findByDealerId(anyString())).thenReturn(null);
         assertThrows(ValidationException.class, () -> auctionService.getHighestBidDetails(null));
+    }
+
+    @Test
+    @DisplayName("Unit test case for putting bids")
+    void putBid(){
+        assertThrows(ValidationException.class, () -> auctionService.putBid(BidRequestDto.builder().auctionId(1L).dealerId(null).amount(5).build()));
+
+        assertThrows(ValidationException.class, () -> auctionService.putBid(BidRequestDto.builder().auctionId(1L).dealerId("1").amount(-5).build()));
+
+        assertThrows(ValidationException.class, () -> auctionService.putBid(BidRequestDto.builder().auctionId(null).dealerId("1").amount(5).build()));
+
+        when(auctionRepository.findByAuctionId(anyLong())).thenReturn(null);
+        assertThrows(ValidationException.class, () -> auctionService.putBid(BidRequestDto.builder().auctionId(1L).dealerId("1").amount(5).build()));
+
+        when(bidRepository.findAll()).thenReturn(Constants.bidList);
+        assertThrows(ValidationException.class, () -> auctionService.putBid(BidRequestDto.builder().auctionId(2L).dealerId("4").amount(500).build()));
+
+        when(bidRepository.findAll()).thenReturn(Constants.bidList);
+        assertThrows(ValidationException.class, () -> auctionService.putBid(BidRequestDto.builder().auctionId(2L).dealerId("4").amount(200).build()));
     }
 
 

@@ -34,10 +34,6 @@ public class AuctionServiceImpl implements AuctionService {
     @Autowired
     private BidRepository bidRepository;
 
-//    @Autowired
-//    private RedisOperationService redisOperationsService;
-
-
     @Override
     public String createAuction(CreateAuctionRequestDto createAuctionRequestDto) {
         log.info("AuctionServiceImpl :: Creating Auction for createAuctionRequestDto {}", createAuctionRequestDto);
@@ -96,9 +92,8 @@ public class AuctionServiceImpl implements AuctionService {
     @Override
     public synchronized void putBid(BidRequestDto bidRequestDto) throws Exception {
 
-        if(StringUtils.isBlank(bidRequestDto.getDealerId())){
-            throw new ValidationException("Dealer id cannot be null :"+ bidRequestDto.getAuctionId());
-        }
+        validateBidRequest(bidRequestDto);
+
         Auction auction = auctionRepository.findByAuctionId(bidRequestDto.getAuctionId());
         if(Objects.isNull(auction)){
             throw new ValidationException("No auction exists for this auction id :"+ bidRequestDto.getAuctionId());
@@ -107,8 +102,7 @@ public class AuctionServiceImpl implements AuctionService {
             throw new ValidationException("No auction is running for this auction id :"+ bidRequestDto.getAuctionId());
         }
         List<Bid> bidList = (List<Bid>) bidRepository.findAll();
-//        RBucket<Object> rbBucket = redisOperationsService.acquire("Auction_"+ auction.getUuid() , TimeUnit.SECONDS, RedisConstants.REDIS_LOCK_TIMEOUT_COUNT);
-//        if(Objects.nonNull(rbBucket)) {
+        //We will use Redis lock on auction_id key
             try {
                 if(!CollectionUtils.isEmpty(bidList)) {
                     Set<Double> bidAmounts = bidList.stream().map(Bid::getAmount).collect(Collectors.toSet());
@@ -133,12 +127,20 @@ public class AuctionServiceImpl implements AuctionService {
             catch (Exception e) {
                 throw new Exception("Exception while putting bid on auction. Exception is {}" + e.getMessage(), e);
             }
-//            finally {
-//                redisOperationsService.release(rbBucket);
-//            }
-//        } else {
-//            putBid(bidRequestDto);
-//        }
+    }
+
+    private static void validateBidRequest(BidRequestDto bidRequestDto) {
+        if(StringUtils.isBlank(bidRequestDto.getDealerId())){
+            throw new ValidationException("Dealer id cannot be null");
+        }
+
+        if(Objects.isNull(bidRequestDto.getAuctionId())){
+            throw new ValidationException("Auction id cannot be null");
+        }
+
+        if(bidRequestDto.getAmount() < 0){
+            throw new ValidationException("Bid amount can't be negative");
+        }
     }
 
     @Override

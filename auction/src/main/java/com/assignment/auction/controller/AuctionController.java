@@ -36,7 +36,7 @@ public class AuctionController {
 
     @ApiOperation(value = "Create Auction")
     @PostMapping(value = "/create")
-    public ResponseDto<String> createAuction(@RequestBody @Valid @NotNull(message = "Auction Creation payload is null") CreateAuctionRequestDto createAuctionRequestDto) {
+    public ResponseDto<String> createAuction(@Valid @RequestBody @NotNull(message = "Auction Creation payload is null") CreateAuctionRequestDto createAuctionRequestDto) {
         log.info("CreateAuctionRequestDto to create auction {}",createAuctionRequestDto);
         String auctionId = "";
         try {

@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Data
@@ -24,5 +25,6 @@ public class CreateAuctionRequestDto {
     @NotNull
     private String itemId;
 
+    @Min(value = 0)
     private double minimumPrice;
 }

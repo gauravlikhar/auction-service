@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 
@@ -25,6 +26,7 @@ public class BidRequestDto {
     @NotNull
     private String dealerId;
 
+    @Min(value = 0)
     private double amount;
 
 }
